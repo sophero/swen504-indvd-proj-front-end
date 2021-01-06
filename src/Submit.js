@@ -1,65 +1,105 @@
 import React, { Component } from 'react';
+import axios from 'axios';
+import Posts from './Posts';
+import './Submit.css';
+
+const API_URL = "https://zach-project.herokuapp.com";
 
 class Submit extends Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             name: "",
-            post: ""
+            post: "",
+            posts: {},
+            view: "SUBMIT"
         };
 
-        // bind class this keyword to class methods
+        // bind this keyword referring to this class to class methods
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.retrievePosts = this.retrievePosts.bind(this);
+        this.switchView = this.switchView.bind(this);
     }
-    
+
+    async componentDidMount() {
+        // print posts. wow, doing the await thing actually works! without await, it will call the method but continue without awaiting the results
+        await this.retrievePosts();
+        console.log("posts in state:");
+        console.log(this.state.posts);
+    }
+
     render() {
-        return(
-            <div className="search__container--sub">
-                <h2>
-                What are you grateful for today?
-                </h2>
-                <div>
-                    <input
-                        ref={this.nameInput}
-                        className="name__input"
-                        type="text"
-                        onClick={e => e.target.select()}
-                        onChange={e => this.setState({ name: e.target.value })}
-                        onKeyUp={e => {if (e.key === "Enter") this.handleSubmit()}}
-                        value={this.state.name}
-                        placeholder="Enter your name (optional)"
+        if (this.state.view === "POSTS") {
+            return(
+                    <Posts
+                        switchView={this.switchView}
                     />
-                </div>
-                <div>
-                    <input
+            )
+        } else if (this.state.view === "SUBMIT") {
+            return(
+                <div className="widget__container">
+                    <h2 className="header__question">
+                    What are you grateful for today?
+                    </h2>
+                    <textarea
                         ref={this.postInput}
-                        className="post__input"
-                        type="text"
+                        className="input__textarea-post"
+                        // type="text"
                         onClick={e => e.target.select()}
                         onChange={e => this.setState({ post: e.target.value })}
                         onKeyUp={e => {if (e.key === "Enter") this.handleSubmit()}}
                         value={this.state.post}
                         placeholder="What are you grateful for today?"
-                        />
-                </div>
-                <div>
-                    <button className="submit__button" onClick={this.handleSubmit}>Submit</button>
-                </div>
-            </div>
-        );
+                    />
+                    <input
+                        ref={this.nameInput}
+                        className="input__name"
+                        type="text"
+                        onClick={e => e.target.select()}
+                        onChange={e => this.setState({ name: e.target.value })}
+                        onKeyUp={e => {if (e.key === "Enter") this.handleSubmit()}}
+                        value={this.state.name}
+                        placeholder="Name (optional)"
+                    />
+                    <button className="input__submit-button" onClick={this.handleSubmit}>submit</button>
+                    <div className="posts__container">
 
+                    </div>
+                </div>
+            );
+        }
     }
 
-    handleSubmit() {
-        // console.log("submit working");
-        // let name = this.state.name.trim();
-        // if (name === "") name = "Anonymous";
+    async handleSubmit() {
+        let name = this.state.name.trim();
+        let body = this.state.post.trim();
+        if (body === "") return; // prevent empty post
+
         const post = {
-            name: this.state.name.trim(),
-            body: this.state.post.trim(),
+            name,
+            body,
             timestamp: Date().toString()
         }
         console.log(post);
+        console.log(`posting to: ${API_URL}/posts`);
+        let res = await axios.post(`${API_URL}/posts`, post);
+        // console.log(res.data);
+        this.switchView();
+    }
+
+    async retrievePosts() {
+        let res = await axios.get(`${API_URL}/posts`);
+        this.setState({ posts: res.data });
+    }
+
+    // switch between submit view and display posts view
+    switchView() {
+        console.log("switchView running");
+        if (this.state.view === "SUBMIT") {
+            this.setState({ view: "POSTS" });
+        } else if (this.state.view === "POSTS") {
+            this.setState({ view: "SUBMIT" });
+        }
     }
 }
 
