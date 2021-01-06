@@ -1,0 +1,37 @@
+.posts__header {
+    text-align: center;
+}
+.post-row__container {
+    width: 85vw;
+    margin: 30px auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 10px;
+    border: 1px solid black;
+}
+.post-row__details, .post-row__footer {
+    width: 85vw;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+.post-row__name {
+    font-size: 0.8em;
+}
+.post-row__delete {
+    margin-left: 20px;
+}
+.post-row__delete:hover {
+    color: red;
+    cursor: pointer;
+}
+.post-row__body {
+    margin: 10px;
+    font-size: 1.3em;
+}
+.post-row__timestamp {
+    font-size: 0.7em;
+}

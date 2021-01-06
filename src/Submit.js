@@ -16,6 +16,7 @@ class Submit extends Component {
         };
 
         // bind this keyword referring to this class to class methods
+        this.deletePost = this.deletePost.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.retrievePosts = this.retrievePosts.bind(this);
         this.switchView = this.switchView.bind(this);
@@ -24,15 +25,17 @@ class Submit extends Component {
     async componentDidMount() {
         // print posts. wow, doing the await thing actually works! without await, it will call the method but continue without awaiting the results
         await this.retrievePosts();
-        console.log("posts in state:");
-        console.log(this.state.posts);
+        // console.log("posts in state:");
+        // console.log(this.state.posts);
     }
 
     render() {
         if (this.state.view === "POSTS") {
             return(
                     <Posts
+                        deletePost={this.deletePost}
                         switchView={this.switchView}
+                        posts={this.state.posts}
                     />
             )
         } else if (this.state.view === "SUBMIT") {
@@ -47,7 +50,6 @@ class Submit extends Component {
                         // type="text"
                         onClick={e => e.target.select()}
                         onChange={e => this.setState({ post: e.target.value })}
-                        onKeyUp={e => {if (e.key === "Enter") this.handleSubmit()}}
                         value={this.state.post}
                         placeholder="What are you grateful for today?"
                     />
@@ -62,9 +64,8 @@ class Submit extends Component {
                         placeholder="Name (optional)"
                     />
                     <button className="input__submit-button" onClick={this.handleSubmit}>submit</button>
-                    <div className="posts__container">
-
-                    </div>
+                    <button className="input__submit-button" onClick={this.switchView}>view all</button>
+                    
                 </div>
             );
         }
@@ -81,10 +82,18 @@ class Submit extends Component {
             timestamp: Date().toString()
         }
         console.log(post);
-        console.log(`posting to: ${API_URL}/posts`);
+        // console.log(`posting to: ${API_URL}/posts`);
         let res = await axios.post(`${API_URL}/posts`, post);
-        // console.log(res.data);
+
+        // update posts list and switch to view posts
+        this.setState({ posts: res.data });
         this.switchView();
+    }
+
+    async deletePost(id) {
+        let res = await axios.delete(`${API_URL}/posts/${id}`);
+        // update posts list if deletion successful
+        this.setState({ posts: res.data });
     }
 
     async retrievePosts() {
@@ -94,7 +103,6 @@ class Submit extends Component {
 
     // switch between submit view and display posts view
     switchView() {
-        console.log("switchView running");
         if (this.state.view === "SUBMIT") {
             this.setState({ view: "POSTS" });
         } else if (this.state.view === "POSTS") {
