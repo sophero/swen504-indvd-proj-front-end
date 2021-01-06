@@ -105,6 +105,7 @@ class Submit extends Component {
     switchView() {
         if (this.state.view === "SUBMIT") {
             this.setState({ view: "POSTS" });
+            this.retrievePosts();
         } else if (this.state.view === "POSTS") {
             this.setState({ view: "SUBMIT" });
         }
