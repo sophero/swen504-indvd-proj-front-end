@@ -9,6 +9,7 @@ class Submit extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            liveUpdate: null,
             name: "",
             post: "",
             posts: {},
@@ -19,6 +20,7 @@ class Submit extends Component {
         this.deletePost = this.deletePost.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.retrievePosts = this.retrievePosts.bind(this);
+        this.runLiveUpdate = this.runLiveUpdate.bind(this);
         this.switchView = this.switchView.bind(this);
     }
 
@@ -97,8 +99,16 @@ class Submit extends Component {
     }
 
     async retrievePosts() {
+        // console.log("retrieve posts running");
         let res = await axios.get(`${API_URL}/posts`);
         this.setState({ posts: res.data });
+    }
+
+    runLiveUpdate() {
+        // console.log("runliveupdate starting");
+        // retrieve updated posts list from server every 6 seconds
+        let liveUpdate = setInterval(this.retrievePosts, 6000);
+        this.setState({ liveUpdate });
     }
 
     // switch between submit view and display posts view
@@ -106,8 +116,10 @@ class Submit extends Component {
         if (this.state.view === "SUBMIT") {
             this.setState({ view: "POSTS" });
             this.retrievePosts();
+            this.runLiveUpdate();
         } else if (this.state.view === "POSTS") {
-            this.setState({ view: "SUBMIT" });
+            clearInterval(this.state.liveUpdate);
+            this.setState({ liveUpdate: null, view: "SUBMIT" });
         }
     }
 }
